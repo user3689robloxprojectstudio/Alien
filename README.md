@@ -1,27 +1,8 @@
-![Uploading image.png…]()
+👽 Alien | High-Quality Tech & Development
 
-# Alien a github project
+We build custom C#, C++, Python, & JS apps, DLLs, websites, and Roblox projects. Established in 2025 with a skilled team dedicated to high-performance code.
 
-What is alien?
-
-Alien is a github project where we make apps c# code c++ code dll's apps and more! We can get involved in Roblox games websites and even python and java script.
-
-We have been doing this since 2025 and we have made progress!
-
-
-Our team is mostly skilled so we make high quality stuff!
-
-
-
-
-
-
-
-Down here is where the updates will be shown on diffrent things like 1 to 1.
-
-
-
-#Updates
-1 Building Roblox Executor/Dll
-2 UNKNOWN
-3 UNKNOWN
+** Roadmap / Updates:**
+✦ v1.0 Roblox Executor / Custom DLL
+✦ v2.0 TBD
+✦ v3.0 TBD
