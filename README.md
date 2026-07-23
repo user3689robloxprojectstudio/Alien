@@ -1,4 +1,4 @@
-https://github.com/user3689robloxprojectstudio/Alien/blob/main/Alien%20A%20github%20project.png?raw=true
+![Uploading image.png…]()
 
 # Alien a github project
 
