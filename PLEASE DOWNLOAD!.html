@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord C++ DLL + C# App Tutorial</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; line-height: 1.6; background: #f4f4f4; }
+        h1, h2 { color: #7289da; }
+        pre { background: #333; color: #fff; padding: 15px; overflow-x: auto; }
+        code { background: #eee; padding: 2px 5px; }
+        .warning { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Building a Discord Automation Tool with C++ DLL and C# App</h1>
+    
+    <p><strong>Important Warning:</strong> Using user tokens (self-bots) violates Discord's Terms of Service and can result in account bans. Always use official <strong>bot tokens</strong>. The 10-minute cooldown is a good practice for rate limiting to avoid abuse. This is for educational purposes only.<grok-card data-id="57dbd9" data-type="citation_card" data-plain-type="" ></grok-card><grok-card data-id="12ecf9" data-type="citation_card" data-plain-type="" ></grok-card></p>
+
+    <h2>Step 1: Create the C++ DLL (Visual Studio)</h2>
+    <ol>
+        <li>Download D++ library (recommended Discord C++ library): Visit <a href="https://github.com/brainboxdotcc/DPP">D++ GitHub</a> or the Windows template.</li>
+        <li>Create a new <strong>Dynamic-Link Library (DLL)</strong> project in Visual Studio 2022.</li>
+        <li>Integrate D++ (follow official Windows setup: add includes, libs, copy DLLs).</li>
+        <li>Create exported functions for your C# app.</li>
+    </ol>
+
+    <h3>Example DLL Code (discord_wrapper.cpp)</h3>
+    <pre><code>#include &lt;dpp/dpp.h&gt;
+#include &lt;string&gt;
+#include &lt;chrono&gt;
+#include &lt;thread&gt;
+
+#ifdef DLL_EXPORTS
+#define DLL_API __declspec(dllexport)
+#else
+#define DLL_API __declspec(dllimport)
+#endif
+
+extern "C" {
+    DLL_API void InitializeBot(const char* token) {
+        static dpp::cluster* bot = nullptr;
+        if (bot) return;
+        bot = new dpp::cluster(token, dpp::i_default_intents | dpp::i_message_content);
+        
+        bot-&gt;on_ready([&](const dpp::ready_t&amp; event) {
+            // Bot ready
+        });
+        
+        bot-&gt;on_message_create([&](const dpp::message_create_t&amp; event) {
+            // Handle messages
+        });
+        
+        bot-&gt;start(dpp::st_return);  // Non-blocking
+    }
+    
+    DLL_API void SendMessage(const char* channel_id, const char* message) {
+        // Use global bot or pass pointer; implement cooldown logic
+        static auto last_send = std::chrono::steady_clock::now();
+        auto now = std::chrono::steady_clock::now();
+        if (std::chrono::duration_cast&lt;std::chrono::minutes&gt;(now - last_send).count() &lt; 10) {
+            return; // Cooldown
+        }
+        last_send = now;
+        // bot-&gt;message_create(...);
+    }
+    
+    // Add more functions: InviteBotToServer logic via OAuth link generation, etc.
+}
+</code></pre>
+
+    <p>Build the project to get <code>YourDLL.dll</code>. Export functions with <code>extern "C" __declspec(dllexport)</code>.</p>
+
+    <h2>Step 2: Create C# Application</h2>
+    <ol>
+        <li>Create a new C# Console or WinForms App in Visual Studio.</li>
+        <li>Add the DLL to your project output directory.</li>
+        <li>Use P/Invoke to call the DLL functions.</li>
+    </ol>
+
+    <h3>Example C# Code</h3>
+    <pre><code>using System;
+using System.Runtime.InteropServices;
+
+class DiscordBotApp {
+    [DllImport("YourDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void InitializeBot(string token);
+    
+    [DllImport("YourDLL.dll", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void SendMessage(string channelId, string message);
+    
+    static void Main() {
+        Console.Write("Enter Bot Token: ");
+        string token = Console.ReadLine();
+        InitializeBot(token);
+        
+        while (true) {
+            Console.Write("Channel ID and Message: ");
+            // Parse and call SendMessage with 10min cooldown handled in DLL
+        }
+    }
+}
+</code></pre>
+
+    <h2>Adding Bot to Server</h2>
+    <p>Generate an invite link:</p>
+    <pre><code>https://discord.com/api/oauth2/authorize?client_id=YOUR_BOT_CLIENT_ID&amp;permissions=2048&amp;scope=bot</code></pre>
+    <p>Replace <code>YOUR_BOT_CLIENT_ID</code> from Discord Developer Portal. "Via account" typically means using the invite link in a browser logged into your user account.</p>
+
+    <h2>Rate Limiting / Cooldown</h2>
+    <p>Discord has strict rate limits. The 10-minute cooldown in the example helps prevent spam/raiding. Implement timers in C++ or C# (e.g., <code>System.Timers.Timer</code>).</p>
+
+    <h2>Next Steps &amp; Resources</h2>
+    <ul>
+        <li>Full D++ docs: <a href="https://dpp.dev/">dpp.dev</a></li>
+        <li>Discord API: <a href="https://discord.com/developers/docs">developers.discord.com</a></li>
+        <li>Handle errors, logging, and more advanced features like slash commands.</li>
+    </ul>
+
+    <p class="warning">Respect Discord ToS. Do not use for raids or spam.</p>
+</body>
+</html>
